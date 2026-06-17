@@ -1,54 +1,28 @@
-"""receptes-scraper — productor d'exemple per a la cua de Reddit (Cloudflare Worker).
+"""receptes-scraper — runner del productor per a la cua privada de Reddit.
 
-Flux: fetch_receptes() → filtra les ja vistes (output/history.json) → enqueue() →
-recorda-les. L'única part que has de canviar és fetch_receptes(): posa-hi el teu
-scraping real (RSS/HTML). La resta (dedup + enqueue) ja és reutilitzable tal qual.
+Recorre tots els col·lectors de `collectors/COLLECTORS`, fa dedup contra
+`output/history.json` (per `dedup_id`) i encua a la cua del Worker els items nous
+amb `enqueue(payload)`. El destí (subreddit), el `source` i el `source_label`
+viatgen dins de cada payload: els posa el col·lector, no aquest runner.
 
-Publica a r/menjars i surt agrupat al popup de l'extensió com a "Receptes".
+Afegir un tipus de contingut nou = un fitxer nou a `collectors/` (i a COLLECTORS);
+aquí no s'hi toca res.
+
+Ús:
+    export WORKER_URL=...  WORKER_WRITE_TOKEN=...
+    python scraper.py              # encua els items nous
+    python scraper.py --dry-run    # només imprimeix què encolaria (sense xarxa al Worker)
 """
 from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
+from collectors import COLLECTORS
 from queue_client import enqueue
 
-# --- Configuració del pack -------------------------------------------------- #
-SUBREDDIT = "BonProfit"      # el destí viatja amb cada item
-SOURCE = "receptes"          # id de la font (nou)
-SOURCE_LABEL = "Receptes"    # com surt agrupat al popup
-
 HISTORY = Path(__file__).parent / "output" / "history.json"
-
-
-def fetch_receptes() -> list[dict]:
-    """TODO: SUBSTITUEIX-HO pel teu scraping real.
-
-    Ha de retornar una llista de receptes amb aquesta forma:
-        {"id": "<id estable, p.ex. la URL>", "title": "...", "markdown": "## ..."}
-    L'"id" ha de ser estable entre execucions perquè el dedup funcioni.
-
-    Exemple amb requests + BeautifulSoup (descomenta i adapta):
-        import requests
-        from bs4 import BeautifulSoup
-        html = requests.get("https://example.cat/receptes", timeout=20).text
-        soup = BeautifulSoup(html, "html.parser")
-        ...
-    """
-    return [
-        {
-            "id": "exemple-fricando",
-            "title": "Recepta de la setmana: Fricandó de vedella amb moixernons",
-            "markdown": (
-                "## Fricandó de vedella amb moixernons\n\n"
-                "**Ingredients:** vedella, moixernons, ceba, tomàquet, vi blanc…\n\n"
-                "**Passos:** enfarina i marca la vedella, sofregeix la ceba…\n\n"
-                "*(Exemple generat per l'esquelet — substitueix `fetch_receptes()`.)*"
-            ),
-        },
-    ]
 
 
 def _seen() -> set[str]:
@@ -67,29 +41,44 @@ def _remember(ids: set[str]) -> None:
     )
 
 
-def main() -> int:
+def main(argv: list[str]) -> int:
+    dry_run = "--dry-run" in argv
     seen = _seen()
-    nous = [r for r in fetch_receptes() if r.get("id") and r["id"] not in seen]
+    nous = 0
+
+    for collector in COLLECTORS:
+        nom = getattr(collector, "__name__", str(collector)).split(".")[-1]
+        try:
+            items = collector.collect()
+        except Exception as e:  # un col·lector que peta no atura la resta
+            print(f"⚠ Col·lector «{nom}» ha fallat: {e}")
+            continue
+
+        for item in items:
+            dedup_id = item["dedup_id"]
+            payload = item["payload"]
+            if dedup_id in seen:
+                print(f"Ja vist ({dedup_id}): {payload['title']}")
+                continue
+
+            if dry_run:
+                print(f"[dry-run] Encolaria ({dedup_id}): {payload['title']}")
+                print(payload["markdown"])
+                print("-" * 70)
+            else:
+                item_id = enqueue(payload)
+                print(f"Encuat: {payload['title']} → {item_id}")
+                seen.add(dedup_id)
+            nous += 1
+
     if not nous:
         print("Res nou a encolar.")
         return 0
 
-    for r in nous:
-        item_id = enqueue({
-            "tipus": "text",
-            "title": r["title"],
-            "subreddit": SUBREDDIT,
-            "source": SOURCE,
-            "source_label": SOURCE_LABEL,
-            "markdown": r["markdown"],
-            "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        })
-        print(f"Encuat: {r['title']} → {item_id}")
-        seen.add(r["id"])
-
-    _remember(seen)
+    if not dry_run:
+        _remember(seen)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

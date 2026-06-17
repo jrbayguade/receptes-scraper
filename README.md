@@ -1,23 +1,55 @@
 # receptes-scraper
 
-Productor d'exemple per a la **cua privada de Reddit** (un Cloudflare Worker + KV).
-Fa scraping de receptes i les **encua** perquè l'extensió de Chrome les publiqui a
-**r/BonProfit** amb un sol clic. No fa servir l'API de Reddit.
+Productor per a la **cua privada de Reddit** (un Cloudflare Worker + KV).
+Genera contingut sobre menjar i l'**encua** perquè l'extensió de Chrome el
+publiqui a **r/BonProfit** amb un sol clic. No fa servir l'API de Reddit.
 
 ```
-scraper.py ──enqueue()──► POST /enqueue (Worker privat) ──► extensió ──► r/BonProfit
+col·lectors ──enqueue()──► POST /enqueue (Worker privat) ──► extensió ──► r/BonProfit
 ```
 
-## Com funciona
+## Arquitectura
 
-- `queue_client.py` — funció genèrica `enqueue(payload)` que fa `POST /enqueue` al
-  Worker amb un *bearer token*. Sense dependències (stdlib). **Cap secret al codi.**
-- `scraper.py` — l'única part que has d'implementar és **`fetch_receptes()`**
-  (el teu scraping real). La resta (dedup via `output/history.json` + `enqueue`) ja hi és.
-- `.github/workflows/receptes.yml` — cron setmanal que executa l'scraper i desa l'històric.
+El productor és una col·lecció de **col·lectors** (un per tipus de contingut) i
+un **runner** que els recorre, fa dedup i encua:
 
-L'item porta `subreddit: "menjars"`, `source: "receptes"` i `source_label: "Receptes"`,
-així es publica al subreddit correcte i surt agrupat al popup com a "Receptes".
+- `collectors/` — un mòdul per tipus de contingut. Cadascun exposa
+  `collect() -> list[dict]` i retorna items amb aquesta forma:
+
+  ```python
+  {
+    "dedup_id": "preus-2026-W25",      # id estable per no repetir (clau del dedup)
+    "payload": {
+      "tipus": "text",                 # 'text' | 'imatge'
+      "subreddit": "BonProfit",
+      "source": "preus",               # tipus de contingut (agrupa al popup)
+      "source_label": "Preus súpers",  # com surt etiquetat al popup
+      "title": "...",
+      "markdown": "...",               # o "url" per a imatges
+    },
+  }
+  ```
+
+  El `subreddit`, el `source` i el `source_label` els posa cada col·lector
+  (viatgen dins del payload), no el runner.
+
+- `collectors/preus.py` — primer col·lector: **comparativa setmanal de preus**
+  d'una cistella bàsica a Esclat, Caprabo i Ametller Origen. Llegeix la cistella
+  de `collectors/cistella.json` (productes, URLs per botiga i unitat de
+  normalització), scrapeja preu i format de cada pàgina i normalitza a €/dotzena,
+  €/L, €/kg o €/unitat. Resilient: si un preu falla, la cel·la queda `n/d`.
+
+- `scraper.py` — el runner. Recorre `collectors.COLLECTORS`, fa dedup contra
+  `output/history.json` (per `dedup_id`) i encua els items nous amb `enqueue()`.
+
+- `queue_client.py` — `enqueue(payload)` genèric: `POST /enqueue` al Worker amb
+  un *bearer token*. Sense dependències (stdlib). **Cap secret al codi.**
+
+- `.github/workflows/receptes.yml` — cron setmanal que executa el runner i desa
+  l'històric.
+
+**Afegir un tipus de contingut nou** = un fitxer nou a `collectors/` amb
+`collect()` + entrada a `COLLECTORS` (a `collectors/__init__.py`). Res més a tocar.
 
 ## Configuració (una vegada)
 
@@ -28,25 +60,26 @@ A **Settings → Secrets and variables → Actions**, afegeix:
 | `WORKER_URL` | l'URL del Worker (p.ex. `https://reddit-queue.<usuari>.workers.dev`) |
 | `WORKER_WRITE_TOKEN` | el `WRITE_TOKEN` del Worker (el mateix que fan servir els altres productors) |
 
-> El token i l'URL **no es committegen mai** — viuen com a secrets d'Actions. Per això
-> aquest repo pot ser públic sense exposar res.
+> El token i l'URL **no es committegen mai** — viuen com a secrets d'Actions.
 
 ## Provar-ho
 
 ```bash
+pip install -r requirements.txt
+
 # contra el teu Worker (o un local amb `wrangler dev`):
 export WORKER_URL="https://reddit-queue.<usuari>.workers.dev"
 export WORKER_WRITE_TOKEN="el_teu_write_token"
 python scraper.py
 ```
 
-Hauria d'imprimir `Encuat: … → <id>` i l'item ha d'aparèixer al popup de l'extensió.
-Una segona execució no encua res (dedup per `output/history.json`).
+Hauria d'imprimir `Encuat: … → <id>` i l'item ha d'aparèixer al popup de
+l'extensió, agrupat com a **Preus súpers**. Una segona execució no encua res
+(dedup per `output/history.json`).
 
-## El que has de fer
+Per iterar ràpid sense tocar el Worker:
 
-1. Implementa **`fetch_receptes()`** a `scraper.py` (retorna `[{"id","title","markdown"}]`).
-2. Afegeix els dos secrets (taula de dalt).
-3. (Opcional) Ajusta el `cron` del workflow.
-
-Res a tocar a l'extensió ni al Worker: el pack nou s'hi endolla sol.
+```bash
+python scraper.py --dry-run     # imprimeix què encolaria, sense xarxa al Worker
+python -m collectors.preus      # només el col·lector de preus (imprimeix el post)
+```
