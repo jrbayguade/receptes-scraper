@@ -1,0 +1,73 @@
+name: Endevina-plat · joc amb IA
+
+on:
+  schedule:
+    # GitHub Actions corre SEMPRE en UTC i no s'ajusta al canvi d'hora.
+    # Volem cada dimecres i diumenge a les 07:52 hora catalana (Europe/Madrid):
+    - cron: "52 5 * * 3,0"   # 07:52 CEST  (estiu, UTC+2)
+    - cron: "52 6 * * 3,0"   # 07:52 CET   (hivern, UTC+1)
+  workflow_dispatch: {}   # botó per executar-lo a mà des de "Actions"
+
+# Necessari per desar output/history.json (dedup) de tornada al repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: endevina
+  cancel-in-progress: false
+
+jobs:
+  # Deixa passar només el cron que coincideix amb les 07:52 d'Europe/Madrid
+  # segons si ara mateix hi ha horari d'estiu (UTC+2) o d'hivern (UTC+1).
+  # Les execucions manuals (workflow_dispatch) sempre passen.
+  finestra:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Execució manual: continuem."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          offset=$(TZ=Europe/Madrid date +%z)   # +0200 (estiu) | +0100 (hivern)
+          if [ "$offset" = "+0200" ]; then want="52 5 * * 3,0"; else want="52 6 * * 3,0"; fi
+          if [ "${{ github.event.schedule }}" = "$want" ]; then
+            echo "Cron correcte per a les 07:52 catalanes (offset $offset): continuem."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Cron '${{ github.event.schedule }}' no toca amb offset $offset; saltem."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  endevina:
+    needs: finestra
+    if: needs.finestra.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instal·la dependències
+        run: pip install -r requirements.txt
+
+      - name: Genera i encua el joc «Endevina el plat» a la cua del Worker
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          WORKER_WRITE_TOKEN: ${{ secrets.WORKER_WRITE_TOKEN }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python scraper.py endevina
+
+      - name: Desa l'històric (dedup)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/history.json 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "chore: històric d'endevina [skip ci]"; git push; }

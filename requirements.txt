@@ -4,4 +4,6 @@
 # El col·lector «receptes» llegeix el feed RSS i raspa la pàgina de la recepta
 # amb requests, i ho parseja amb la stdlib (xml.etree + html.parser): cap
 # dependència nova.
+# El col·lector «endevina» crida l'API de DeepSeek amb requests (cal el secret
+# DEEPSEEK_API_KEY): tampoc cap dependència nova.
 requests>=2.31
