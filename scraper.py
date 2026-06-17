@@ -10,7 +10,8 @@ aquí no s'hi toca res.
 
 Ús:
     export WORKER_URL=...  WORKER_WRITE_TOKEN=...
-    python scraper.py              # encua els items nous
+    python scraper.py              # tots els col·lectors
+    python scraper.py receptes     # només els col·lectors indicats (per nom)
     python scraper.py --dry-run    # només imprimeix què encolaria (sense xarxa al Worker)
 """
 from __future__ import annotations
@@ -43,11 +44,20 @@ def _remember(ids: set[str]) -> None:
 
 def main(argv: list[str]) -> int:
     dry_run = "--dry-run" in argv
+    # Arguments posicionals = noms de col·lectors a executar (buit → tots). Permet
+    # horaris separats al cron: p. ex. `scraper.py preus` i `scraper.py receptes`.
+    nomes = {a for a in argv if not a.startswith("-")}
+    coneguts = {getattr(c, "__name__", str(c)).split(".")[-1] for c in COLLECTORS}
+    for desconegut in sorted(nomes - coneguts):
+        print(f"⚠ Col·lector desconegut: {desconegut}")
+
     seen = _seen()
     nous = 0
 
     for collector in COLLECTORS:
         nom = getattr(collector, "__name__", str(collector)).split(".")[-1]
+        if nomes and nom not in nomes:
+            continue
         try:
             items = collector.collect()
         except Exception as e:  # un col·lector que peta no atura la resta

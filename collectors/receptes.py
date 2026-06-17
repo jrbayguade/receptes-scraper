@@ -259,7 +259,7 @@ def collect() -> list[dict]:
     titol = (item.findtext("title") or "").strip()
     description = item.findtext("description") or ""
 
-    title = f"Recepta de la setmana: {titol}"
+    title = f"Recepta d'avui: {titol}"
     created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
     # Recepta completa: es baixa la pàgina un sol cop i se'n treuen ingredients
