@@ -1,4 +1,7 @@
 # queue_client.py només fa servir la stdlib.
 # Els col·lectors fan scraping HTTP amb requests (sense navegador: tots els preus
 # s'obtenen via JSON-LD, dades incrustades o l'API pública de la botiga).
+# El col·lector «receptes» llegeix el feed RSS i raspa la pàgina de la recepta
+# amb requests, i ho parseja amb la stdlib (xml.etree + html.parser): cap
+# dependència nova.
 requests>=2.31

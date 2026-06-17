@@ -18,6 +18,6 @@ Afegir un tipus de contingut nou = un fitxer nou aquí + entrada a COLLECTORS.
 """
 from __future__ import annotations
 
-from . import preus
+from . import preus, receptes
 
-COLLECTORS = [preus]
+COLLECTORS = [preus, receptes]
