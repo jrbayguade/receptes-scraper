@@ -3,9 +3,9 @@ name: Receptes · cua per a l'extensió
 on:
   schedule:
     # GitHub Actions corre SEMPRE en UTC i no s'ajusta al canvi d'hora.
-    # Volem dimarts i dijous a les 07:23 hora catalana (Europe/Madrid):
-    - cron: "23 5 * * 2,4"   # 07:23 CEST  (estiu, UTC+2)
-    - cron: "23 6 * * 2,4"   # 07:23 CET   (hivern, UTC+1)
+    # Volem cada dilluns a les 07:18 hora catalana (Europe/Madrid):
+    - cron: "18 5 * * 1"   # 07:18 CEST  (estiu, UTC+2)
+    - cron: "18 6 * * 1"   # 07:18 CET   (hivern, UTC+1)
   workflow_dispatch: {}   # botó per executar-lo a mà des de "Actions"
 
 # Necessari per desar output/history.json (dedup) de tornada al repo.
@@ -33,9 +33,9 @@ jobs:
             exit 0
           fi
           offset=$(TZ=Europe/Madrid date +%z)   # +0200 (estiu) | +0100 (hivern)
-          if [ "$offset" = "+0200" ]; then want="23 5 * * 2,4"; else want="23 6 * * 2,4"; fi
+          if [ "$offset" = "+0200" ]; then want="18 5 * * 1"; else want="18 6 * * 1"; fi
           if [ "${{ github.event.schedule }}" = "$want" ]; then
-            echo "Cron correcte per a les 07:23 catalanes (offset $offset): continuem."
+            echo "Cron correcte per a les 07:18 catalanes (offset $offset): continuem."
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "Cron '${{ github.event.schedule }}' no toca amb offset $offset; saltem."
