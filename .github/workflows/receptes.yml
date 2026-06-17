@@ -2,8 +2,10 @@ name: Receptes · cua per a l'extensió
 
 on:
   schedule:
-    # Cada dimecres a les 07:00 UTC. Ajusta-ho com vulguis (https://crontab.guru).
-    - cron: "0 7 * * 3"
+    # GitHub Actions corre SEMPRE en UTC i no s'ajusta al canvi d'hora.
+    # Volem dimarts i dijous a les 07:23 hora catalana (Europe/Madrid):
+    - cron: "23 5 * * 2,4"   # 07:23 CEST  (estiu, UTC+2)
+    - cron: "23 6 * * 2,4"   # 07:23 CET   (hivern, UTC+1)
   workflow_dispatch: {}   # botó per executar-lo a mà des de "Actions"
 
 # Necessari per desar output/history.json (dedup) de tornada al repo.
@@ -15,7 +17,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Deixa passar només el cron que coincideix amb les 07:23 d'Europe/Madrid
+  # segons si ara mateix hi ha horari d'estiu (UTC+2) o d'hivern (UTC+1).
+  # Les execucions manuals (workflow_dispatch) sempre passen.
+  finestra:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Execució manual: continuem."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          offset=$(TZ=Europe/Madrid date +%z)   # +0200 (estiu) | +0100 (hivern)
+          if [ "$offset" = "+0200" ]; then want="23 5 * * 2,4"; else want="23 6 * * 2,4"; fi
+          if [ "${{ github.event.schedule }}" = "$want" ]; then
+            echo "Cron correcte per a les 07:23 catalanes (offset $offset): continuem."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Cron '${{ github.event.schedule }}' no toca amb offset $offset; saltem."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   receptes:
+    needs: finestra
+    if: needs.finestra.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
