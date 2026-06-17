@@ -16,7 +16,7 @@ from pathlib import Path
 from queue_client import enqueue
 
 # --- Configuració del pack -------------------------------------------------- #
-SUBREDDIT = "menjars"        # el destí viatja amb cada item
+SUBREDDIT = "BonProfit"      # el destí viatja amb cada item
 SOURCE = "receptes"          # id de la font (nou)
 SOURCE_LABEL = "Receptes"    # com surt agrupat al popup
 

@@ -2,10 +2,10 @@
 
 Productor d'exemple per a la **cua privada de Reddit** (un Cloudflare Worker + KV).
 Fa scraping de receptes i les **encua** perquè l'extensió de Chrome les publiqui a
-**r/menjars** amb un sol clic. No fa servir l'API de Reddit.
+**r/BonProfit** amb un sol clic. No fa servir l'API de Reddit.
 
 ```
-scraper.py ──enqueue()──► POST /enqueue (Worker privat) ──► extensió ──► r/menjars
+scraper.py ──enqueue()──► POST /enqueue (Worker privat) ──► extensió ──► r/BonProfit
 ```
 
 ## Com funciona
