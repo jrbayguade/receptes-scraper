@@ -1,0 +1,4 @@
+# L'esquelet (queue_client.py) només fa servir la stdlib.
+# Descomenta el que necessitis quan implementis el scraping real a fetch_receptes():
+# requests>=2.31
+# beautifulsoup4>=4.12

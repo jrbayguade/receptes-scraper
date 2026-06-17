@@ -1,0 +1,43 @@
+name: Receptes · cua per a l'extensió
+
+on:
+  schedule:
+    # Cada dimecres a les 07:00 UTC. Ajusta-ho com vulguis (https://crontab.guru).
+    - cron: "0 7 * * 3"
+  workflow_dispatch: {}   # botó per executar-lo a mà des de "Actions"
+
+# Necessari per desar output/history.json (dedup) de tornada al repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: receptes
+  cancel-in-progress: false
+
+jobs:
+  receptes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instal·la dependències
+        run: pip install -r requirements.txt
+
+      - name: Encua les receptes noves a la cua privada del Worker
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          WORKER_WRITE_TOKEN: ${{ secrets.WORKER_WRITE_TOKEN }}
+        run: python scraper.py
+
+      - name: Desa l'històric (dedup)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/history.json 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "chore: històric de receptes [skip ci]"; git push; }
