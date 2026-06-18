@@ -259,10 +259,99 @@ def scrape_ametller(url: str) -> dict:
     }
 
 
+def scrape_condis(url: str) -> dict:
+    """Condis: app Next.js amb el producte al payload incrustat.
+
+    El preu va en cèntims (`sale_price` si hi ha oferta, si no `list_price`) i el
+    format/quantitat surt de la descripció. La pàgina redirigeix a un flux OAuth
+    anònim, però `requests` el segueix sol (galetes dins la mateixa crida).
+    """
+    html = _get(url).text
+    u = html.replace('\\"', '"')
+    m = re.search(
+        r'"productInformation":\{(.*?)"__typename":"ProductResponse"\}', u, re.S
+    )
+    if not m:
+        raise ValueError("productInformation no trobat")
+    blk = m.group(1)
+
+    def _str(name: str) -> str:
+        mm = re.search(rf'"{name}":"([^"]*)"', blk)
+        return mm.group(1) if mm else ""
+
+    def _cents(name: str) -> int:
+        mm = re.search(rf'"{name}":(\d+)', blk)
+        return int(mm.group(1)) if mm else 0
+
+    cents = _cents("sale_price") or _cents("list_price")
+    preu = cents / 100 if cents else None
+    text = " ".join(x for x in (_str("description"), _str("net_amount")) if x)
+    return {"preu": preu, "format_text": text}
+
+
+# Token guest de l'API de Plusfresc (es resol un cop).
+_PLUSFRESC: dict = {}
+_PLUSFRESC_API = "https://wscompra.plusfresc.cat/api/"
+
+
+def _plusfresc_token() -> str:
+    """Token guest (centre 12 per defecte) per a la API REST de Plusfresc."""
+    r = requests.post(
+        _PLUSFRESC_API + "loginGuest/12", data="", headers=HEADERS, timeout=TIMEOUT
+    )
+    r.raise_for_status()
+    time.sleep(DELAY)
+    return r.text.strip().strip('"')
+
+
+def scrape_plusfresc(url: str) -> dict:
+    """Plusfresc: API REST (SPA Angular) `productdetails/files/<id>/<lang>`.
+
+    `value_cents` és el preu del paquet i `value_x_unit` el preu per unitat de
+    mesura (€/kg, €/L). Per als productes de pes/volum variable (el nom diu
+    «aprox»), el pes del nom no és fiable, així que es força l'ús del `value_x_unit`.
+    """
+    if "token" not in _PLUSFRESC:
+        _PLUSFRESC["token"] = _plusfresc_token()
+
+    m = re.search(r"/product-detail/(\d+)", url)
+    if not m:
+        raise ValueError(f"id de producte no trobat a {url}")
+    pid = m.group(1)
+
+    r = _get(
+        f"{_PLUSFRESC_API}productdetails/files/{pid}/ca",
+        headers={**HEADERS, "Authorization": "Bearer " + _PLUSFRESC["token"]},
+    )
+    p = r.json().get("product", {}) or {}
+    cents = p.get("value_cents")
+    preu = cents / 100 if cents else None
+    noms = [
+        t.get("text", "")
+        for t in p.get("texts", [])
+        if t.get("lang") == "ca" and t.get("type") == 4
+    ]
+    nom = noms[0] if noms else ""
+    um = (p.get("unit_measure") or "").lower()  # 'kg' | 'l' | 'un' | 'dot'
+    ppu_unitat = "kg" if um == "kg" else "L" if um == "l" else None
+    vxu = p.get("value_x_unit")
+    ppu = vxu / 100 if vxu else None
+    # Pes/volum «aprox» → el pes del nom enganya; buidant el text es força el ppu.
+    format_text = "" if "aprox" in nom.lower() else nom
+    return {
+        "preu": preu,
+        "format_text": format_text,
+        "ppu": ppu,
+        "ppu_unitat": ppu_unitat,
+    }
+
+
 SCRAPERS = {
     "Esclat": scrape_esclat,
     "Caprabo": scrape_caprabo,
     "Ametller Origen": scrape_ametller,
+    "Condis": scrape_condis,
+    "Plusfresc": scrape_plusfresc,
 }
 
 
