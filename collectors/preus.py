@@ -86,7 +86,7 @@ def _parse_volume_l(text: str) -> float | None:
 
 def _parse_count(text: str) -> int | None:
     """Nombre d'unitats ('12 per paquet', '2 u', '1 dotzena')."""
-    if re.search(r"dotzen|docena", text, re.IGNORECASE):  # ca | es (Eroski)
+    if re.search(r"dotzen", text, re.IGNORECASE):
         return 12
     m = re.search(
         r"(\d+)\s*(?:per\s+paquet|unitats?|uds?\b|u\b|×|x)", text, re.IGNORECASE
