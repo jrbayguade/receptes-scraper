@@ -34,7 +34,7 @@ un **runner** que els recorre, fa dedup i encua:
   (viatgen dins del payload), no el runner.
 
 - `collectors/preus.py` — primer col·lector: **comparativa setmanal de preus**
-  d'una cistella bàsica a Esclat, Caprabo i Ametller Origen. Llegeix la cistella
+  d'una cistella bàsica a Esclat, Ametller Origen, Condis i Plusfresc. Llegeix la cistella
   de `collectors/cistella.json` (productes, URLs per botiga i unitat de
   normalització), scrapeja preu i format de cada pàgina i normalitza a €/dotzena,
   €/L, €/kg o €/unitat. Resilient: si un preu falla, la cel·la queda `n/d`.

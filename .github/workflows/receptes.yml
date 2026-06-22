@@ -6,7 +6,12 @@ on:
     # Volem cada dimarts i dijous a les 07:52 hora catalana (Europe/Madrid):
     - cron: "52 5 * * 2,4"   # 07:52 CEST  (estiu, UTC+2)
     - cron: "52 6 * * 2,4"   # 07:52 CET   (hivern, UTC+1)
-  workflow_dispatch: {}   # botó per executar-lo a mà des de "Actions"
+  workflow_dispatch:      # botó per executar-lo a mà des de "Actions"
+    inputs:
+      prefereix_foto:
+        description: "Força una recepta amb foto (per validar el post d'imatge)"
+        type: boolean
+        default: false
 
 # Necessari per desar output/history.json (dedup) de tornada al repo.
 permissions:
@@ -61,6 +66,9 @@ jobs:
         env:
           WORKER_URL: ${{ secrets.WORKER_URL }}
           WORKER_WRITE_TOKEN: ${{ secrets.WORKER_WRITE_TOKEN }}
+          # Override manual: força una recepta amb foto (validar el post d'imatge).
+          # En cron programat l'input ve buit i el flag queda desactivat.
+          RECEPTES_PREFEREIX_FOTO: ${{ inputs.prefereix_foto }}
         run: python scraper.py receptes
 
       - name: Desa l'històric (dedup)

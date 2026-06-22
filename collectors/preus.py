@@ -8,7 +8,6 @@ genera un sol post en markdown amb la taula comparativa.
 
 Scraping (tot amb `requests`, sense navegador):
   · Esclat (Bonpreu)  → JSON-LD `Product` incrustat (size + offers.price).
-  · Caprabo (Eroski)  → bloc `structured_data` incrustat (price) + nom (format).
   · Ametller Origen   → API Salesforce Commerce (SCAPI): token guest SLAS i
                         després shopper-products (price + pricePerUnit).
 
@@ -146,19 +145,6 @@ def scrape_esclat(url: str) -> dict:
         )
         return {"preu": float(preu) if preu else None, "format_text": text}
     raise ValueError("JSON-LD de producte no trobat")
-
-
-def scrape_caprabo(url: str) -> dict:
-    """Caprabo/Eroski: preu al bloc `structured_data` incrustat; format al nom."""
-    html = _get(url).text
-    m = re.search(r'"price\\?":\\?"([\d.]+)\\?"', html)
-    preu = float(m.group(1)) if m else None
-    nom = ""
-    t = re.search(r'<meta property="og:title" content="([^"]+)"', html) or \
-        re.search(r"<title>([^<]+)</title>", html)
-    if t:
-        nom = t.group(1)
-    return {"preu": preu, "format_text": nom}
 
 
 # Configuració i token de l'API Salesforce d'Ametller (es resol un cop).
@@ -348,7 +334,6 @@ def scrape_plusfresc(url: str) -> dict:
 
 SCRAPERS = {
     "Esclat": scrape_esclat,
-    "Caprabo": scrape_caprabo,
     "Ametller Origen": scrape_ametller,
     "Condis": scrape_condis,
     "Plusfresc": scrape_plusfresc,

@@ -73,7 +73,12 @@ def main(argv: list[str]) -> int:
 
             if dry_run:
                 print(f"[dry-run] Encolaria ({dedup_id}): {payload['title']}")
-                print(payload["markdown"])
+                if payload.get("tipus") == "imatge":
+                    print(f"[imatge] {payload.get('url', '')}")
+                    if payload.get("comment_markdown"):
+                        print(payload["comment_markdown"])
+                else:
+                    print(payload.get("markdown", ""))
                 print("-" * 70)
             else:
                 item_id = enqueue(payload)

@@ -2,14 +2,19 @@
 
 Llegeix el feed RSS públic (https://www.receptes.cat/index.xml), tria la recepta
 més recent (per `pubDate`) que encara no s'hagi publicat (no és a
-`output/history.json`) i en genera un sol post de **text** amb la recepta
-completa: els ingredients en llista + l'elaboració sencera + l'enllaç a
-l'original.
+`output/history.json`) i en genera un post amb la recepta completa: els
+ingredients en llista + l'elaboració sencera + l'enllaç a l'original.
 
-Sempre és un post de text (no d'imatge): el cos sempre es veu, mentre que el
-comentari sota un post d'imatge l'extensió no l'arriba a publicar de manera
-fiable. Com que el feed ve truncat, la recepta sencera es treu de la pàgina de la
-recepta (ingredients del JSON-LD `recipeIngredient`, elaboració del
+Si la recepta té **foto pròpia** (JSON-LD `image`, descartant la placeholder),
+es publica com a **post d'imatge** (la foto) amb la recepta sencera al **primer
+comentari** (`comment_markdown`), igual que el pack «explorant» de l'altre
+productor: Reddit no renderitza imatges externes al cos d'un selftext, així que
+aquesta és l'única manera d'ensenyar la foto. Si no en té (placeholder o cap),
+recau en un **post de text** amb la recepta al cos (sempre visible), per no
+publicar mai un post d'imatge buit.
+
+Com que el feed ve truncat, la recepta sencera es treu de la pàgina de la recepta
+(ingredients del JSON-LD `recipeIngredient`, elaboració del
 `<div class="instructions">`). Si la pàgina no es pot raspar, recau en el teaser
 del feed perquè el post mai surti buit.
 
@@ -21,6 +26,7 @@ nova, `collect()` retorna `[]` i el runner continua amb la resta.
 from __future__ import annotations
 
 import json
+import os
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -188,6 +194,30 @@ def _elaboracio(html: str, recipe: dict) -> str:
     return ""
 
 
+# Placeholder de receptes.cat per a receptes sense foto pròpia. Descartar-la
+# evita publicar un post d'imatge amb una imatge buida/genèrica.
+_PLACEHOLDER_IMG = "thumbphoto/400/default.jpg"
+
+
+def _image_url(recipe: dict) -> str:
+    """URL de la foto pròpia de la recepta, o cadena buida si no en té.
+
+    El camp `image` del JSON-LD pot venir com a cadena, com a llista o com a
+    objecte `ImageObject` (amb `url`). Es descarta la placeholder
+    (.../thumbphoto/400/default.jpg): aquestes receptes es publiquen com a post
+    de text, no com a post d'imatge erroni.
+    """
+    img = recipe.get("image")
+    if isinstance(img, list):
+        img = img[0] if img else None
+    if isinstance(img, dict):
+        img = img.get("url")
+    url = str(img or "").strip()
+    if not url or _PLACEHOLDER_IMG in url:
+        return ""
+    return url
+
+
 def _cos(ingredients: list[str], elaboracio: str, description: str,
          link: str) -> str:
     """Cos del post: recepta completa (ingredients en llista + elaboració) i
@@ -245,15 +275,32 @@ def collect() -> list[dict]:
         return []
 
     seen = _seen()
-    # La recepta més recent (per pubDate) que encara no s'hagi publicat.
-    candidats = sorted(items, key=_pubdate, reverse=True)
-    item = next(
-        (it for it in candidats if (it.findtext("link") or "").strip()
-         and (it.findtext("link") or "").strip() not in seen),
-        None,
-    )
-    if item is None:
+    # Candidats no publicats, de més recent a més antic (per pubDate).
+    candidats = [
+        it for it in sorted(items, key=_pubdate, reverse=True)
+        if (it.findtext("link") or "").strip()
+        and (it.findtext("link") or "").strip() not in seen
+    ]
+    if not candidats:
         return []
+
+    # Selecció: per defecte, la més recent. La pàgina de cada candidat es baixa un
+    # sol cop i se'n reaprofiten html/recipe més avall.
+    item = candidats[0]
+    html = _recipe_page((item.findtext("link") or "").strip())
+    recipe = _jsonld_recipe(html) if html else {}
+
+    # Override manual (RECEPTES_PREFEREIX_FOTO): per validar el post d'imatge, si
+    # la recepta de torn no té foto pròpia, salta a la més recent que en tingui.
+    # Si cap candidat en té, es queda amb la més recent (comportament per defecte).
+    if (os.environ.get("RECEPTES_PREFEREIX_FOTO", "").strip() not in ("", "0", "false")
+            and not _image_url(recipe)):
+        for cand in candidats[1:]:
+            chtml = _recipe_page((cand.findtext("link") or "").strip())
+            crecipe = _jsonld_recipe(chtml) if chtml else {}
+            if _image_url(crecipe):
+                item, html, recipe = cand, chtml, crecipe
+                break
 
     link = (item.findtext("link") or "").strip()
     titol = (item.findtext("title") or "").strip()
@@ -262,24 +309,26 @@ def collect() -> list[dict]:
     title = f"Recepta d'avui: {titol}"
     created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
-    # Recepta completa: es baixa la pàgina un sol cop i se'n treuen ingredients
-    # i elaboració. Si la pàgina falla, `_cos` recau en el teaser del feed.
-    # Sempre post de text: el cos sempre és visible (a diferència d'un comentari
-    # sota un post d'imatge, que l'extensió no publica de manera fiable).
-    html = _recipe_page(link)
-    recipe = _jsonld_recipe(html) if html else {}
+    # Recepta completa: ingredients + elaboració de la pàgina ja baixada.
+    # Si la pàgina ha fallat, `_cos` recau en el teaser del feed.
     markdown = _cos(_ingredients(html, recipe), _elaboracio(html, recipe),
                     description, link)
+    image = _image_url(recipe)
 
     payload = {
-        "tipus": "text",
         "subreddit": SUBREDDIT,
         "source": SOURCE,
         "source_label": SOURCE_LABEL,
         "title": title,
-        "markdown": markdown,
         "created_at": created_at,
     }
+    if image:
+        # Amb foto pròpia: post d'imatge + recepta sencera al primer comentari.
+        payload.update({"tipus": "imatge", "url": image,
+                        "comment_markdown": markdown})
+    else:
+        # Sense foto: post de text, amb la recepta al cos (sempre visible).
+        payload.update({"tipus": "text", "markdown": markdown})
     return [{"dedup_id": link, "payload": payload}]
 
 
