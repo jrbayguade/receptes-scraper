@@ -10,6 +10,8 @@ Scraping (tot amb `requests`, sense navegador):
   · Esclat (Bonpreu)  → JSON-LD `Product` incrustat (size + offers.price).
   · Ametller Origen   → API Salesforce Commerce (SCAPI): token guest SLAS i
                         després shopper-products (price + pricePerUnit).
+  · bonÀrea           → pàgina server-rendered: `content-price` (preu del paquet)
+                        i `price-kl` (preu per unitat de mesura: €/kg, €/L o €/u).
 
 És resilient: si una botiga o un producte falla, aquella cel·la queda «n/d» i la
 resta del post es genera igualment. Respecta el lloc: peticions seqüencials, amb
@@ -25,6 +27,7 @@ import re
 import time
 import urllib.parse
 from datetime import date, datetime, timezone
+from html import unescape
 from pathlib import Path
 
 import requests
@@ -332,9 +335,47 @@ def scrape_plusfresc(url: str) -> dict:
     }
 
 
+def scrape_bonarea(url: str) -> dict:
+    """bonÀrea: pàgina server-rendered. `content-price` és el preu del paquet i
+    `price-kl` el preu per unitat de mesura (€/kg, €/L o €/u).
+
+    Per als productes a pes/volum s'usa el `price-kl` com a ppu (és fiable encara
+    que el paquet sigui gran, p.ex. una garrafa d'oli de 5 L). Per als venuts per
+    peça (ous, enciam) el nom no porta el nombre d'unitats, així que es dedueix del
+    quocient preu_paquet / preu_per_unitat i es retorna com a `format_text` perquè
+    `normalitza` el parsegi (dotzena → ×12, unitat → preu per peça)."""
+    html = _get(url).text
+    cp = re.search(r'content-price[^>]*>\s*<span[^>]*>\s*([\d.,]+)\s*€', html)
+    preu = _num(cp.group(1)) if cp else None
+    kl = re.search(r'price-kl[^>]*>\s*\(?\s*([\d.,]+)\s*€\s*/?\s*([a-zA-Z]+)', html)
+    nom = ""
+    t = re.search(r"<title>([^<]+)</title>", html)
+    if t:
+        nom = re.sub(r"^Comprar\s+|\s+a bon.*$", "", unescape(t.group(1))).strip()
+
+    ppu = ppu_unitat = None
+    format_text = nom
+    if kl and preu:
+        val, um = _num(kl.group(1)), kl.group(2).lower()
+        if um == "kg":
+            ppu, ppu_unitat, format_text = val, "kg", ""
+        elif um.startswith("l"):  # 'l' | 'litre'
+            ppu, ppu_unitat, format_text = val, "L", ""
+        elif um.startswith("u") and val:  # 'u' | 'u.' → preu per peça
+            n = round(preu / val)
+            format_text = f"{n} u" if n else nom
+    return {
+        "preu": preu,
+        "format_text": format_text,
+        "ppu": ppu,
+        "ppu_unitat": ppu_unitat,
+    }
+
+
 SCRAPERS = {
     "Esclat": scrape_esclat,
     "Ametller Origen": scrape_ametller,
+    "bonÀrea": scrape_bonarea,
     "Condis": scrape_condis,
     "Plusfresc": scrape_plusfresc,
 }
@@ -350,15 +391,20 @@ def _label(unitat: str) -> str:
             "unitat": "€/u"}.get(unitat, "€")
 
 
+def _q(v: float) -> str:
+    """Quantitat amb coma decimal i sense zeros sobrants ('1.5'→'1,5', '5.0'→'5')."""
+    return f"{v:.2f}".rstrip("0").rstrip(".").replace(".", ",")
+
+
 def _format_brut(qty: float | None, mena: str) -> str:
     if qty is None:
         return ""
     if mena == "kg":
-        return f"{qty * 1000:.0f} g" if qty < 1 else f"{qty:g} kg"
+        return f"{qty * 1000:.0f} g" if qty < 1 else f"{_q(qty)} kg"
     if mena == "L":
-        return f"{qty:g} L"
+        return f"{_q(qty)} L"
     if mena == "u":
-        return "1 dotzena" if qty == 12 else f"{qty:g} u"
+        return "1 dotzena" if round(qty) == 12 else f"{_q(qty)} u"
     return ""
 
 

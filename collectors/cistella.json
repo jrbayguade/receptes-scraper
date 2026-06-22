@@ -2,7 +2,7 @@
   "subreddit": "BonProfit",
   "source": "preus",
   "source_label": "Preus súpers",
-  "botigues": ["Esclat", "Ametller Origen", "Condis", "Plusfresc"],
+  "botigues": ["Esclat", "Ametller Origen", "Condis", "Plusfresc", "bonÀrea"],
   "productes": [
     {
       "nom": "Ous (12u)",
@@ -11,7 +11,8 @@
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/bonpreu-ous-frescos-de-gallines-soltes-en-el-galliner-l/38974",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/ous-de-gallines-soltes-m-essencials-12u/59976.html",
         "Condis": "https://compraonline.condis.es/ous-condis-gallines-criades-al-terra-l-12-unitats/p/170606/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/012789"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/012789",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/ous-m-ros-en-estoig/13_6253"
       }
     },
     {
@@ -21,18 +22,20 @@
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/bonpreu-llet-sencera-en-cartr%C3%B3/81177",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/llet-sencera-a2-llet-llet-ametller-origen-1l/2389.html",
         "Condis": "https://compraonline.condis.es/llet-condis-sencera-1-l/p/704049/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/007404"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/007404",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/llet-sencera/13_9097"
       }
     },
     {
       "nom": "Pa de pagès",
       "unitat": "kg",
-      "nota": "formats diferents: Esclat 400g, Ametller 450g, Condis 400g, Plusfresc 450g",
+      "nota": "formats diferents: Esclat 400g, Ametller 450g, Condis 400g, Plusfresc 450g, bonÀrea ~360g",
       "urls": {
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/pa-de-pag%C3%A8s/31054",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/pa-tradicional-ametller-origen-450g/58464.html",
         "Condis": "https://compraonline.condis.es/rustik-bakery-fosasa-cereals-400-g/p/213278/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/002509"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/002509",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/pa-fogassa-amb-massa-mare/13_8170"
       }
     },
     {
@@ -42,18 +45,20 @@
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/bonpreu-arr%C3%B2s-extra/84755",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/arros-extra-essencials-1kg/54253.html",
         "Condis": "https://compraonline.condis.es/arros-condis-extra-1-kg/p/103009/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/031932"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/031932",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/arros-extra/13_7553"
       }
     },
     {
       "nom": "Pit de pollastre",
       "unitat": "kg",
-      "nota": "formats diferents: Esclat 1kg, Ametller 405g, Condis 500g, Plusfresc 500g",
+      "nota": "formats diferents: Esclat 1kg, Ametller 405g, Condis 500g, Plusfresc 500g, bonÀrea ~660g",
       "urls": {
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/bonpreu-pit-de-pollastre-al-buit/81579",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/pit-de-pollastre-filetejat-ametller-origen/49494.html",
         "Condis": "https://compraonline.condis.es/pit-de--pollastre-sencer-500-g/p/15062/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/007282"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/007282",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/pit-de-pollastre-blanc-sencer/13_6304"
       }
     },
     {
@@ -63,29 +68,32 @@
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/bonpreu-oli-d-oliva-verge-extra/05290",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/oli-doliva-verge-extra-ametller-origen-1l/41929.html",
         "Condis": "https://compraonline.condis.es/oli-condis-verge-extra-1-l/p/800215/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/025954"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/025954",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/oli-d-oliva-verge-extra/13_7506"
       }
     },
     {
       "nom": "Cebes",
       "unitat": "kg",
-      "nota": "formats diferents: Esclat 1kg, Ametller 1kg, Condis 1kg, Plusfresc 1kg",
+      "nota": "formats diferents: Esclat 1kg, Ametller 1kg, Condis 1kg, Plusfresc 1kg, bonÀrea malla 2kg",
       "urls": {
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/la-collita-ceba-seca-km0-en-malla-d-1-kg/07375",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/ceba-cuina-bossa-1kg/55893.html",
         "Condis": "https://compraonline.condis.es/ceba-condis-buti-bossa-1-kg/p/191132/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008635"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008635",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/ceba-malla/13_2545"
       }
     },
     {
       "nom": "Enciam romà",
       "unitat": "unitat",
-      "nota": "formats diferents: Esclat 2u, Ametller 1u, Condis 2u, Plusfresc 1u",
+      "nota": "formats diferents: Esclat 2u, Ametller 1u, Condis 2u, Plusfresc 1u, bonÀrea 2u",
       "urls": {
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/la-collita-cor-d-enciam-rom%C3%A0-en-bossa-de-2-u/06701",
         "Ametller Origen": "https://www.ametllerorigen.com/ca/enciam-llarg/109.html",
         "Condis": "https://compraonline.condis.es/enciam-romana-2-unitats/p/191491/ca_ES",
-        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008733"
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008733",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/enciam-cors-de-romana/13_2505"
       }
     }
   ]
