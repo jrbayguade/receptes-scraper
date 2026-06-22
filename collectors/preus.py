@@ -472,13 +472,27 @@ def collect() -> list[dict]:
     }]
 
 
+def _store_home(botiga: str, productes: list[dict]) -> str | None:
+    """Pàgina d'inici de la botiga (esquema + host) a partir de la primera URL."""
+    for prod in productes:
+        u = prod["urls"].get(botiga)
+        if u:
+            p = urllib.parse.urlparse(u)
+            return f"{p.scheme}://{p.netloc}"
+    return None
+
+
 def _build_markdown(cfg, botigues, productes, cells, totals, totals_complets,
                     totals_count) -> str:
     avui = date.today().strftime("%d/%m/%Y")
     out: list[str] = []
 
-    # Capçalera de la taula
-    out.append("| Producte | " + " | ".join(botigues) + " |")
+    # Capçalera: cada botiga enllaça a la seva botiga online.
+    caps = []
+    for b in botigues:
+        home = _store_home(b, productes)
+        caps.append(f"[{b}]({home})" if home else b)
+    out.append("| Producte | " + " | ".join(caps) + " |")
     out.append("|---|" + "|".join([":--:"] * len(botigues)) + "|")
 
     for i, prod in enumerate(productes):
@@ -488,13 +502,15 @@ def _build_markdown(cfg, botigues, productes, cells, totals, totals_complets,
         mn = min([v for v in vals if v is not None], default=None)
         cel = []
         for b in botigues:
-            norm, brut = cells[(i, b)]
+            norm, _brut = cells[(i, b)]
             if norm is None:
                 cel.append(NA)
                 continue
+            # Cada preu (normalitzat a la unitat comparable) enllaça al producte.
             txt = f"{_fmt(norm)} {label}"
-            if brut:
-                txt += f" ({brut})"
+            url = prod["urls"].get(b)
+            if url:
+                txt = f"[{txt}]({url})"
             if mn is not None and abs(norm - mn) < 1e-9:
                 txt = f"**{txt}**"
             cel.append(txt)
