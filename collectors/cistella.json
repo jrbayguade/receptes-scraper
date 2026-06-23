@@ -29,7 +29,7 @@
       }
     },
     {
-      "nom": "Pa de pagès",
+      "nom": "Pa de pagès (1kg)",
       "unitat": "kg",
       "nota": "formats diferents: Esclat 400g, Ametller 450g, Condis 400g, Plusfresc 450g, bonÀrea ~360g",
       "urls": {
@@ -54,7 +54,7 @@
       }
     },
     {
-      "nom": "Pit de pollastre",
+      "nom": "Pit de pollastre (1kg)",
       "unitat": "kg",
       "nota": "formats diferents: Esclat 1kg, Ametller 405g, Condis 500g, Plusfresc 500g, bonÀrea ~660g",
       "urls": {
@@ -79,7 +79,7 @@
       }
     },
     {
-      "nom": "Cebes",
+      "nom": "Cebes (1kg)",
       "unitat": "kg",
       "nota": "formats diferents: Esclat 1kg, Ametller 1kg, Condis 1kg, Plusfresc 1kg, bonÀrea malla 2kg",
       "urls": {
@@ -92,7 +92,7 @@
       }
     },
     {
-      "nom": "Enciam romà",
+      "nom": "Enciam romà (u.)",
       "unitat": "unitat",
       "nota": "formats diferents: Esclat 2u, Ametller 1u, Condis 2u, Plusfresc 1u, bonÀrea 2u",
       "urls": {
