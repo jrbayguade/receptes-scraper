@@ -372,10 +372,50 @@ def scrape_bonarea(url: str) -> dict:
     }
 
 
+MERCA_API = "https://tienda.mercadona.es/api/products/"
+MERCA_WH = "bcn1"  # magatzem de Barcelona: estoc i preus de Mercadona són per zona
+
+
+def scrape_mercadona(url: str) -> dict:
+    """Mercadona: API pública `/api/products/<id>` (JSON).
+
+    `unit_price` és el preu del paquet i `price_instructions.reference_price` /
+    `reference_format` el preu ja normalitzat (€/kg, €/L, €/dotzena «dc», €/unitat
+    «ud»). Es consulta el magatzem de Barcelona (`wh=bcn1`) perquè l'estoc i els
+    preus són per zona —alguns productes, com el pa de pagès, només hi són en
+    algunes zones— i el públic és català. Per als productes per peça (ous, enciam)
+    es dedueix el compte d'`unit_size` perquè `normalitza` el parsegi."""
+    m = re.search(r"/product/(\d+)", url)
+    if not m:
+        raise ValueError(f"id de producte no trobat a {url}")
+    r = _get(
+        MERCA_API + m.group(1),
+        headers={**HEADERS, "Accept": "application/json"},
+        params={"lang": "es", "wh": MERCA_WH},
+    )
+    pi = r.json().get("price_instructions", {}) or {}
+    up = pi.get("unit_price")
+    preu = float(up) if up else None
+    ref = pi.get("reference_price")
+    reff = (pi.get("reference_format") or "").lower()
+    if reff == "kg":
+        return {"preu": preu, "format_text": "",
+                "ppu": float(ref) if ref else None, "ppu_unitat": "kg"}
+    if reff in ("l", "litro"):
+        return {"preu": preu, "format_text": "",
+                "ppu": float(ref) if ref else None, "ppu_unitat": "L"}
+    # dotzena / unitat: el preu de referència és per peça; es dedueix el compte.
+    size = pi.get("unit_size")
+    n = int(size) if size and float(size).is_integer() else None
+    return {"preu": preu, "format_text": f"{n} u" if n else "",
+            "ppu": None, "ppu_unitat": None}
+
+
 SCRAPERS = {
     "Esclat": scrape_esclat,
     "Ametller Origen": scrape_ametller,
     "bonÀrea": scrape_bonarea,
+    "Mercadona": scrape_mercadona,
     "Condis": scrape_condis,
     "Plusfresc": scrape_plusfresc,
 }
