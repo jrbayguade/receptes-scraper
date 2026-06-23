@@ -84,7 +84,7 @@
       "nota": "formats diferents: Esclat 1kg, Ametller 1kg, Condis 1kg, Plusfresc 1kg, bonÀrea malla 2kg",
       "urls": {
         "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/la-collita-ceba-seca-km0-en-malla-d-1-kg/07375",
-        "Ametller Origen": "https://www.ametllerorigen.com/ca/ceba-cuina-bossa-1kg/55893.html",
+        "Ametller Origen": "https://www.ametllerorigen.com/ca/ceba-cuina/204.html",
         "Condis": "https://compraonline.condis.es/ceba-condis-buti-bossa-1-kg/p/191132/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008635",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/ceba-malla/13_2545",
@@ -102,6 +102,32 @@
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008733",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/enciam-cors-de-romana/13_2505",
         "Mercadona": "https://tienda.mercadona.es/product/69121/lechugas-corazon-romana-paquete"
+      }
+    },
+    {
+      "nom": "Patata (1kg)",
+      "unitat": "kg",
+      "nota": "formats diferents: Esclat 800g, Ametller a pes, Condis 3kg, Plusfresc a granel, bonÀrea ~3kg, Mercadona 3kg",
+      "urls": {
+        "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/la-collita-patata-blanca-bossa-800-g/38902",
+        "Ametller Origen": "https://www.ametllerorigen.com/ca/patata-kennebec/213.html",
+        "Condis": "https://compraonline.condis.es/patata-condis-versatil-bossa-3-kg/p/191640/ca_ES",
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008672",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/patata-agria/13_2752",
+        "Mercadona": "https://tienda.mercadona.es/product/69166/patatas-malla"
+      }
+    },
+    {
+      "nom": "Tomàquet (1kg)",
+      "unitat": "kg",
+      "nota": "varietats diferents: Esclat rosa, Ametller madur, Condis de penjar, Plusfresc madur, bonÀrea madur, Mercadona amanir",
+      "urls": {
+        "Esclat": "https://www.compraonline.bonpreuesclat.cat/products/la-collita-tom%C3%A0quet-rosa-en-safata-de-600-grams/75358",
+        "Ametller Origen": "https://www.ametllerorigen.com/ca/tomaquet-madur-extra/154.html",
+        "Condis": "https://compraonline.condis.es/tomate-de-untar-bandeja-500g/p/191826/ca_ES",
+        "Plusfresc": "https://compra.plusfresc.cat/product-detail/008519",
+        "bonÀrea": "https://www.bonarea-online.com/online/producte/tomaquet-madur/13_2562",
+        "Mercadona": "https://tienda.mercadona.es/product/69937/tomate-ensalada-pieza"
       }
     }
   ]
