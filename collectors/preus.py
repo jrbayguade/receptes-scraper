@@ -427,7 +427,8 @@ def _fmt(v: float) -> str:
 
 
 def _label(unitat: str) -> str:
-    return {"dotzena": "€/dotzena", "L": "€/L", "kg": "€/kg",
+    # «dotzena» sense sufix: la fila ja indica «12u», el preu és per dotzena.
+    return {"dotzena": "€", "L": "€/L", "kg": "€/kg",
             "unitat": "€/u"}.get(unitat, "€")
 
 
