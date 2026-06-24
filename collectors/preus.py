@@ -88,7 +88,7 @@ def _parse_volume_l(text: str) -> float | None:
 
 def _parse_count(text: str) -> int | None:
     """Nombre d'unitats ('12 per paquet', '2 u', '1 dotzena')."""
-    if re.search(r"dotzen", text, re.IGNORECASE):
+    if re.search(r"dotzen|docena", text, re.IGNORECASE):  # ca | es
         return 12
     m = re.search(
         r"(\d+)\s*(?:per\s+paquet|unitats?|uds?\b|u\b|×|x)", text, re.IGNORECASE
@@ -411,11 +411,67 @@ def scrape_mercadona(url: str) -> dict:
             "ppu": None, "ppu_unitat": None}
 
 
+# Sessió de Consum (es resol un cop; cal escalfar-la per les galetes d'Incapsula).
+_CONSUM: dict = {}
+CONSUM_API = "https://tienda.consum.es/api/rest/V1.0/catalog/product"
+
+
+def _consum_session() -> "requests.Session":
+    """Sessió amb galetes d'Incapsula: cal visitar la home un cop abans de l'API."""
+    if "s" not in _CONSUM:
+        s = requests.Session()
+        s.headers.update({**HEADERS, "Accept": "application/json, text/plain, */*"})
+        s.get("https://tienda.consum.es/", timeout=TIMEOUT)
+        time.sleep(DELAY)
+        _CONSUM["s"] = s
+    return _CONSUM["s"]
+
+
+def scrape_consum(url: str) -> dict:
+    """Consum: API `/catalog/product?productCodes=<codi>` (JSON), darrere d'Incapsula.
+
+    `priceData.prices` porta el preu del paquet (`centAmount`) i el preu per unitat
+    de mesura (`centUnitAmount`) segons `unitPriceUnitType` (€/kg, €/L, €/dotzena
+    «Dc»…). Malgrat el nom «cent», els imports són en euros. S'usa el preu d'oferta
+    si n'hi ha. Per als productes per peça (ous «Docena», enciam «2Ud») el compte
+    surt del nom i el parseja `normalitza`."""
+    m = re.search(r"/(\d+)(?:[/?#]|$)", url)
+    if not m:
+        raise ValueError(f"codi de producte no trobat a {url}")
+    s = _consum_session()
+    r = s.get(CONSUM_API,
+              params={"productCodes": m.group(1), "includeFilters": "false"},
+              timeout=TIMEOUT)
+    r.raise_for_status()
+    time.sleep(DELAY)
+    prods = r.json().get("products", [])
+    if not prods:
+        raise ValueError(f"producte {m.group(1)} no trobat")
+    pr = prods[0]["priceData"]
+    prices = {x["id"]: x for x in pr["prices"]}
+    chosen = prices.get("OFFER_PRICE") or prices.get("PRICE") or pr["prices"][0]
+    preu = float(chosen["value"]["centAmount"])
+    ppu = float(chosen["value"]["centUnitAmount"])
+    parts = (pr.get("unitPriceUnitType") or "").split()
+    um = parts[-1].lower() if parts else ""
+    ppu_unitat = "kg" if um == "kg" else "L" if um == "l" else None
+    # El nom es manté sempre com a `format_text`: per als productes a pes/volum dona
+    # el ppu de reserva, però per als comptats (ous «Docena», enciam «2Ud») és l'únic
+    # lloc on hi ha el compte —Consum pot tarifar l'enciam per kg tot i vendre's a u.
+    return {
+        "preu": preu,
+        "format_text": prods[0]["productData"]["name"],
+        "ppu": ppu if ppu_unitat else None,
+        "ppu_unitat": ppu_unitat,
+    }
+
+
 SCRAPERS = {
     "Esclat": scrape_esclat,
     "Ametller Origen": scrape_ametller,
     "bonÀrea": scrape_bonarea,
     "Mercadona": scrape_mercadona,
+    "Consum": scrape_consum,
     "Condis": scrape_condis,
     "Plusfresc": scrape_plusfresc,
 }

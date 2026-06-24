@@ -2,7 +2,7 @@
   "subreddit": "BonProfit",
   "source": "preus",
   "source_label": "Preus súpers",
-  "botigues": ["Esclat", "Ametller Origen", "Condis", "Plusfresc", "bonÀrea", "Mercadona"],
+  "botigues": ["Esclat", "Ametller Origen", "Condis", "Plusfresc", "bonÀrea", "Mercadona", "Consum"],
   "productes": [
     {
       "nom": "Ous (12u)",
@@ -13,7 +13,8 @@
         "Condis": "https://compraonline.condis.es/ous-condis-gallines-criades-al-terra-l-12-unitats/p/170606/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/012789",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/ous-m-ros-en-estoig/13_6253",
-        "Mercadona": "https://tienda.mercadona.es/product/31505/huevos-medianos-m-paquete"
+        "Mercadona": "https://tienda.mercadona.es/product/31505/huevos-medianos-m-paquete",
+        "Consum": "https://tienda.consum.es/es/p/huevos-m-medianos-docena/7098382"
       }
     },
     {
@@ -25,7 +26,8 @@
         "Condis": "https://compraonline.condis.es/llet-condis-sencera-1-l/p/704049/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/007404",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/llet-sencera/13_9097",
-        "Mercadona": "https://tienda.mercadona.es/product/10380/leche-entera-hacendado-brick"
+        "Mercadona": "https://tienda.mercadona.es/product/10380/leche-entera-hacendado-brick",
+        "Consum": "https://tienda.consum.es/es/p/leche-entera-brik/7080596"
       }
     },
     {
@@ -38,7 +40,8 @@
         "Condis": "https://compraonline.condis.es/rustik-bakery-fosasa-cereals-400-g/p/213278/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/002509",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/pa-fogassa-amb-massa-mare/13_8170",
-        "Mercadona": "https://tienda.mercadona.es/product/83155/pan-payes-rebanado-paquete"
+        "Mercadona": "https://tienda.mercadona.es/product/83155/pan-payes-rebanado-paquete",
+        "Consum": "https://tienda.consum.es/es/p/hogaza-rebanada-100-natural/7402550"
       }
     },
     {
@@ -50,7 +53,8 @@
         "Condis": "https://compraonline.condis.es/arros-condis-extra-1-kg/p/103009/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/017144",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/arros-extra/13_7553",
-        "Mercadona": "https://tienda.mercadona.es/product/5044/arroz-redondo-hacendado-paquete"
+        "Mercadona": "https://tienda.mercadona.es/product/5044/arroz-redondo-hacendado-paquete",
+        "Consum": "https://tienda.consum.es/es/p/arroz-redondo-extra-origen-espana/7022762"
       }
     },
     {
@@ -63,7 +67,8 @@
         "Condis": "https://compraonline.condis.es/pit-de--pollastre-sencer-500-g/p/15062/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/007282",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/pit-de-pollastre-blanc-sencer/13_6304",
-        "Mercadona": "https://tienda.mercadona.es/product/3724/pechugas-enteras-pollo-bandeja"
+        "Mercadona": "https://tienda.mercadona.es/product/3724/pechugas-enteras-pollo-bandeja",
+        "Consum": "https://tienda.consum.es/es/p/pechuga-de-pollo/140814"
       }
     },
     {
@@ -75,7 +80,8 @@
         "Condis": "https://compraonline.condis.es/oli-condis-verge-extra-1-l/p/800215/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/025954",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/oli-d-oliva-verge-extra/13_7506",
-        "Mercadona": "https://tienda.mercadona.es/product/4740/aceite-oliva-virgen-extra-hacendado-botella"
+        "Mercadona": "https://tienda.mercadona.es/product/4740/aceite-oliva-virgen-extra-hacendado-botella",
+        "Consum": "https://tienda.consum.es/es/p/aceite-oliva-virgen-extra-botella/7265705"
       }
     },
     {
@@ -88,7 +94,8 @@
         "Condis": "https://compraonline.condis.es/ceba-condis-buti-bossa-1-kg/p/191132/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008635",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/ceba-malla/13_2545",
-        "Mercadona": "https://tienda.mercadona.es/product/69089/cebollas-malla"
+        "Mercadona": "https://tienda.mercadona.es/product/69089/cebollas-malla",
+        "Consum": "https://tienda.consum.es/es/p/cebolla-seca-malla-1-kg/76018"
       }
     },
     {
@@ -101,7 +108,8 @@
         "Condis": "https://compraonline.condis.es/enciam-romana-2-unitats/p/191491/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008733",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/enciam-cors-de-romana/13_2505",
-        "Mercadona": "https://tienda.mercadona.es/product/69121/lechugas-corazon-romana-paquete"
+        "Mercadona": "https://tienda.mercadona.es/product/69121/lechugas-corazon-romana-paquete",
+        "Consum": "https://tienda.consum.es/es/p/corazones-romana-2ud-peso-aproximado-650-gr/7325830"
       }
     },
     {
@@ -114,7 +122,8 @@
         "Condis": "https://compraonline.condis.es/patata-condis-versatil-bossa-3-kg/p/191640/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008672",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/patata-agria/13_2752",
-        "Mercadona": "https://tienda.mercadona.es/product/69166/patatas-malla"
+        "Mercadona": "https://tienda.mercadona.es/product/69166/patatas-malla",
+        "Consum": "https://tienda.consum.es/es/p/patata-nueva-espana-aptas-todo-uso-culinario/303677"
       }
     },
     {
@@ -127,7 +136,8 @@
         "Condis": "https://compraonline.condis.es/tomate-de-untar-bandeja-500g/p/191826/ca_ES",
         "Plusfresc": "https://compra.plusfresc.cat/product-detail/008519",
         "bonÀrea": "https://www.bonarea-online.com/online/producte/tomaquet-madur/13_2562",
-        "Mercadona": "https://tienda.mercadona.es/product/69937/tomate-ensalada-pieza"
+        "Mercadona": "https://tienda.mercadona.es/product/69937/tomate-ensalada-pieza",
+        "Consum": "https://tienda.consum.es/es/p/tomate-ensalada/60012"
       }
     }
   ]
